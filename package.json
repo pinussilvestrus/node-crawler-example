@@ -1,0 +1,19 @@
+{
+  "name": "node-crawler-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.15.1",
+    "install": "^0.11.0",
+    "js-crawler": "^0.3.20",
+    "npm": "^5.8.0",
+    "tree-model": "^1.0.6",
+    "winston-color": "^1.0.0"
+  }
+}
