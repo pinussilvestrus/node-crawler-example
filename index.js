@@ -19,16 +19,23 @@ let _url = commander.url;
 let _depth = commander.depth || 2;
 
 // {url: 'xy', children: [{url: 'xyc', children: [..]}]}
-let urlTree = tree.parse({url: _url, children: []});
-
+let urlTreeRoot = tree.parse({url: _url, children: []});
 /**
- * handles the pretty print of the output stream
+ * handles the pretty print of the output stream, print as a tree
  */
-let handleOutput = () => {
-  urlTree.walk(node => {
-    console.log(node.model.url);
+let handleOutput = (root, tabbing = 0) => {
+  root.walk(node => {
+    if (node.parent && node.parent.model.url === root.model.url) {
+      for(let i = 0; i <= tabbing*2; i++) process.stdout.write(" ");
+      console.log(`|--- ${node.model.url}`);
+    }
   });
+
+  tabbing++;
+  root.children ? root.children.forEach(node => handleOutput(node, tabbing)) : '';
 }
+
+console.time('Crawling time'); // start timer
 
 let crawler = new Crawler().configure({ignoreRelative: false, depth: _depth});
 logger.info(`Start crawling '${_url}' with depth ${_depth} ...`);
@@ -36,13 +43,21 @@ crawler.crawl({
   url: commander.url,
   success: page => {
     let newUrl = tree.parse({url: page.url, children: []});
-    urlTree.addChild(newUrl);
+
+    // add to correct referer node
+    let refererNode = urlTreeRoot.first(function(node) {
+      return node.model.url === page.referer;
+    });
+
+    (refererNode || urlTreeRoot).addChild(newUrl);
   },
   failure: page => {
-    console.log(page.status);
+    logger.error(`Error on page '${page.url}' with status ${page.status}`);
   },
   finished: crawledUrls => {
     logger.info(`Found hyperlinks: ${crawledUrls.length}`);
-    handleOutput();
+    console.log(urlTreeRoot.model.url);
+    handleOutput(urlTreeRoot);
+    console.timeEnd('Crawling time');
   }
 });
