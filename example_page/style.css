@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'Raleway';
+  src: url('/Raleway/Raleway-Light.ttf');
+}
+
+@font-face {
+  font-family: 'Thin';
+  src: url('/Raleway/Raleway-Thin.ttf');
+}
+
+body {
+  font:inherit;
+  font-family: Raleway;
+  text-align: center;
+  vertical-align: baseline;
+} 
+
+h1 {
+  font-size: 75px;
+  font-family: Thin;
+}
+
+ul {
+  text-align: left;
+  font-size: 30px;
+  list-style-type: none;
+}
+
+li {
+  margin-left: -4px;
+}

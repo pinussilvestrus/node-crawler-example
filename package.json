@@ -4,7 +4,8 @@
   "description": "Web Crawling example for exercise on 'Information Retrieval' course @HSHarz",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example-server": "http-server example_page"
   },
   "author": "",
   "license": "ISC",

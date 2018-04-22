@@ -24,15 +24,18 @@ let urlTreeRoot = tree.parse({url: _url, children: []});
  * handles the pretty print of the output stream, print as a tree
  */
 let handleOutput = (root, tabbing = 0) => {
-  root.walk(node => {
-    if (node.parent && node.parent.model.url === root.model.url) {
-      for(let i = 0; i <= tabbing*2; i++) process.stdout.write(" ");
-      console.log(`|--- ${node.model.url}`);
-    }
-  });
+  if (tabbing == 0) {
+    console.log(root.model.url);
+  } else {
+    for(let i = 0; i <= tabbing * 2; i++) process.stdout.write(" ");
+    console.log(`|--- ${root.model.url}`);
+  }
 
   tabbing++;
-  root.children ? root.children.forEach(node => handleOutput(node, tabbing)) : '';
+
+  root.children.forEach(node => {
+    handleOutput(node , tabbing);
+  });
 }
 
 console.time('Crawling time'); // start timer
@@ -56,7 +59,7 @@ crawler.crawl({
   },
   finished: crawledUrls => {
     logger.info(`Found hyperlinks: ${crawledUrls.length}`);
-    console.log(urlTreeRoot.model.url);
+    //console.log(urlTreeRoot.model.url);
     handleOutput(urlTreeRoot);
     console.timeEnd('Crawling time');
   }
