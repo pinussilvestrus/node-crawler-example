@@ -18,17 +18,56 @@ if (!commander.url) {
 let _url = commander.url;
 let _depth = commander.depth || 2;
 
-// {url: 'xy', children: [{url: 'xyc', children: [..]}]}
-let urlTreeRoot = tree.parse({url: _url, children: []});
+// {url: 'xy', children: [{url: 'xyc', children: [..]}], hub: 0, authority: 0}
+let urlTreeRoot = tree.parse({url: _url, children: [], hub: 0, authority: 0});
+/**
+* generates the hubs and authority values of each node (https://de.wikipedia.org/wiki/Hubs_und_Authorities)
+* pseudocode: http://www.seomastering.com/wiki/HITS_algorithm
+**/
+let calculateHubAndAuthorityValues = root => {
+
+  root.walk(node => {
+    node.model.hub = 1;
+    node.model.authority = 1;
+  });
+
+  // iterate k times
+  let k = 3;
+  let skip = true;
+  for (let i = 0; i <= k; i++) {
+    root.walk(node => {
+      // overcome trivial root
+      if (skip) {
+        skip = false;
+        return;
+      }
+
+      // authority, ingoing neighboard = parent
+      (node.model.children || []).forEach(c => {
+        c.authority += node.model.hub;
+      });
+
+      // hub, outgoing neighbors = children
+      (node.model.children || []).forEach(c => {
+        node.model.hub += c.authority;
+      });
+    });
+
+    skip = true;
+  }
+};
+
 /**
  * handles the pretty print of the output stream, print as a tree
  */
 let handleOutput = (root, tabbing = 0) => {
+
+
   if (tabbing == 0) {
-    console.log(root.model.url);
+    console.log(`${root.model.url}, a: ${root.model.authority}, h: ${root.model.hub}`);
   } else {
     for(let i = 0; i <= tabbing * 2; i++) process.stdout.write(" ");
-    console.log(`|--- ${root.model.url}`);
+    console.log(`|--- ${root.model.url}, a: ${root.model.authority}, h: ${root.model.hub}`);
   }
 
   tabbing++;
@@ -58,6 +97,7 @@ crawler.crawl({
     logger.error(`Error on page '${page.url}' with status ${page.status}`);
   },
   finished: crawledUrls => {
+    calculateHubAndAuthorityValues(urlTreeRoot);
     logger.info(`Found hyperlinks: ${crawledUrls.length}`);
     //console.log(urlTreeRoot.model.url);
     handleOutput(urlTreeRoot);
